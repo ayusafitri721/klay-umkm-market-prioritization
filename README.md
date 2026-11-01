@@ -4,16 +4,14 @@
 **Studi kasus:** Skalar Solutions - Klay (POS + AI Sales Analytics)
 **Kelompok:** 13
 **Anggota:**
-1. [Nama 1] - Data collection & data understanding
-2. [Nama 2] - Data preparation & merging
-3. [Nama 3] - EDA, visualisasi & rancangan bobot ICP
-
-> Lengkapi nama anggota sebelum submit. ZIP akhir: `Tugas2_DS_Kelompok13.zip`.
+1. Ayu Safitri (2610501106) - Data collection & data understanding
+2. Carissa Zia W. F (2610514008) - Data preparation & merging
+3. Gerard Harjuno N (2610512189) - EDA, visualisasi & rancangan bobot ICP
 
 ## Ringkasan
 
 Analisis mencakup 35 kabupaten/kota Provinsi Jawa Tengah. Setelah pembersihan dan filter
-kualitas data, 30 wilayah dianalisis untuk menyusun kerangka Indeks Calon Pelanggan (ICP)
+kualitas data, 30 wilayah dianalisis untuk menyusun kerangka Ideal Customer Profile (ICP)
 Klay. Ruang lingkup berhenti pada perancangan bobot ICP; K-Means, skor akhir, Top 5, dan
 uji sensitivitas bobot dikerjakan pada milestone berikutnya.
 
@@ -42,7 +40,8 @@ Tabel PDF yang dipakai dari sumber 1: 7.2.2 (IMK 2023), 13.2.5 (PDRB per kapita 
 │       ├── master_raw.csv           # 35 wilayah, sebelum filter
 │       ├── master_clean.csv         # 30 wilayah, setelah filter + normalisasi
 │       ├── wilayah_tereliminasi.csv # 5 wilayah gugur + alasan
-│       └── provinsi_umkm_series.csv # time series UMKM binaan 2019-2024
+│       ├── provinsi_umkm_series.csv # time series UMKM binaan 2019-2024
+│       └── Tugas2_DS_Kelompok13_Data.xlsx # Excel berformat: ringkasan, data, wilayah gugur, UMKM provinsi, bobot ICP
 ├── figures/                         # 9 figur EDA dan bobot ICP
 ├── report/
 │   └── Tugas2_DS_Kelompok13.pdf     # laporan ringkas
@@ -74,9 +73,10 @@ Tabel PDF yang dipakai dari sumber 1: 7.2.2 (IMK 2023), 13.2.5 (PDRB per kapita 
    python scripts/build_dataset.py
    ```
 
-4. Jalankan notebook:
+4. Tulis ulang notebook dari generator, lalu eksekusi:
 
    ```bash
+   python scripts/make_notebook.py
    jupyter nbconvert --to notebook --execute --inplace Tugas2_DS_Kelompok13.ipynb
    ```
 
@@ -115,18 +115,21 @@ Tabel PDF yang dipakai dari sumber 1: 7.2.2 (IMK 2023), 13.2.5 (PDRB per kapita 
 
 | Komponen | Indikator | Arah | Bobot |
 |---|---|---|---|
-| Ukuran Pasar | Penduduk; pedagang pasar | + | 25% |
+| Ukuran Pasar | Jumlah unit IMK; jumlah pedagang pasar | + | 25% |
 | Kepadatan Sektor Target | IMK/100k; pedagang/100k | + | 25% |
-| Kesiapan Digital | IPM; pengeluaran per kapita | + | 20% |
-| Adopsi Pembayaran Digital | Simpanan/kapita; tabungan/kapita | + | 15% |
+| Kesiapan Digital | IPM; pengeluaran per kapita (proxy) | + | 20% |
+| Adopsi Pembayaran Digital | Simpanan/kapita; tabungan/kapita (proxy) | + | 15% |
 | Aktivitas Ekonomi | PDRB per kapita | + | 15% |
 
 Total bobot = 100%. Skor akhir dan Top 5 tidak dihitung di Tugas 2.
+
+Catatan sektor: data publik yang dipakai tidak menyediakan komposisi ritel/F&B/jasa per kab/kota. IMK dan pedagang pasar dipakai sebagai proxy, dan filter sektor tanpa transaksi harian rutin tidak diterapkan. Limitasi ini dicatat eksplisit di laporan dan notebook.
 
 ## Keterbatasan
 
 - IMK adalah proxy manufaktur mikro/kecil, bukan seluruh UMKM.
 - Pedagang pasar adalah proxy retail tradisional, bukan seluruh retail.
+- Komposisi ritel/F&B/jasa per kab/kota tidak tersedia; filter sektor tanpa transaksi harian rutin tidak diterapkan.
 - QRIS merchant per kabupaten/kota tidak tersedia publik.
 - UMKM binaan hanya level provinsi dan hanya mencakup UMKM yang difasilitasi Dinkop.
 - Filter mengeluarkan 4 dari 6 kota, sehingga hasil lebih representatif untuk kabupaten.

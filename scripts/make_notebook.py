@@ -19,17 +19,17 @@ md(r"""
 **Studi kasus:** Skalar Solutions - Klay (POS + AI Sales Analytics)
 **Kelompok:** 13
 **Anggota:**
-1. [Nama 1] - Data collection & data understanding
-2. [Nama 2] - Data preparation & merging
-3. [Nama 3] - EDA, visualisasi & rancangan bobot ICP
+1. Ayu Safitri (2610501106) - Data collection & data understanding
+2. Carissa Zia W. F (2610514008) - Data preparation & merging
+3. Gerard Harjuno N (2610512189) - EDA, visualisasi & rancangan bobot ICP
 
-> Lengkapi nama anggota sebelum submit. Notebook ini hanya sampai perancangan bobot ICP; K-Means, skor akhir, Top 5, dan uji sensitivitas dikerjakan pada milestone berikutnya.
+> Notebook ini hanya sampai perancangan bobot ICP; K-Means, skor akhir, Top 5, dan uji sensitivitas dikerjakan pada milestone berikutnya.
 """)
 
 md(r"""
 ## Ringkasan Eksekutif
 
-Klay menjual POS + AI Sales Analytics ke UMKM. Untuk memprioritaskan wilayah sourcing leads, kami menyusun kerangka **Indeks Calon Pelanggan (ICP)** di **35 kabupaten/kota Jawa Tengah** dengan empat sumber publik BPS/Dinkop Jateng (2023-2024).
+Klay menjual POS + AI Sales Analytics ke UMKM. Untuk memprioritaskan wilayah sourcing leads, kami menyusun kerangka **Ideal Customer Profile (ICP)** di **35 kabupaten/kota Jawa Tengah** dengan empat sumber publik BPS/Dinkop Jateng (2023-2024).
 
 Temuan utama:
 
@@ -48,7 +48,7 @@ md(r"""
 | No | Sumber | Link akses | Alasan dipilih | Level agregasi | Kolom kunci | Keterbatasan |
 |---|---|---|---|---|---|---|
 | 1 | BPS Jawa Tengah, *Provinsi Jawa Tengah Dalam Angka 2025* | [Publikasi BPS](https://jateng.bps.go.id/id/publication/2025/02/28/6f9ad30e8755ed2b706cb979/provinsi-jawa-tengah-dalam-angka-2025.html) | Satu publikasi resmi memuat IMK, PDRB per kapita, sarana perdagangan, simpanan, dan tabungan per kabupaten/kota | Kabupaten/kota (35) | Tabel 7.2.2 (IMK 2023), 13.2.5 (PDRB 2024), 10.2.23 (sarana 2024), 10.3.2/10.3.3 (simpanan/tabungan 2024) | Sebagian tabel berupa PDF; nama wilayah tidak membedakan Kabupaten/Kota; ada watermark dan sel "en dash" |
-| 2 | BPS Jawa Tengah, *Penduduk, Laju Pertumbuhan, Kepadatan, dan Rasio Jenis Kelamin menurut Kabupaten/Kota 2024* | [Dataset CKAN](https://data.jatengprov.go.id/dataset/79a-penduduk-laju-pertumbuhan-penduduk-distribusi-persentase-penduduk-kepadatan-penduduk-rasio-jenis) | Basis ukuran pasar dan denominator kepadatan sektor | Kabupaten/kota (35) | `kod_wil`, `kab_ko`, `jumlah_penduduk`, `kepadatan_penduduk` | Hanya satu tahun; proyeksi penduduk, bukan sensus |
+| 2 | BPS Jawa Tengah, *Penduduk, Laju Pertumbuhan, Kepadatan, dan Rasio Jenis Kelamin menurut Kabupaten/Kota 2024* | [Dataset CKAN](https://data.jatengprov.go.id/dataset/79a-penduduk-laju-pertumbuhan-penduduk-distribusi-persentase-penduduk-kepadatan-penduduk-rasio-jenis) | Denominator kepadatan sektor dan konteks demografi | Kabupaten/kota (35) | `kod_wil`, `kab_ko`, `jumlah_penduduk`, `kepadatan_penduduk` | Hanya satu tahun; proyeksi penduduk, bukan sensus |
 | 3 | BPS Jawa Tengah, *Indeks Pembangunan Manusia (IPM) menurut Kabupaten/Kota 2024* | [Dataset CKAN](https://data.jatengprov.go.id/dataset/6c4-indeks-pembangunan-manusia-ipm-menurut-kabupaten-kota) | Proxy kesiapan digital dan kualitas sumber daya manusia | Kabupaten/kota (35) | `kod_wil`, `indikator`, `indeks` | IPM bersifat agregat; tidak mengukur literasi digital secara langsung |
 | 4 | Dinkop Jateng, *Jumlah UMKM Binaan Jawa Tengah* | [Dataset CKAN](https://data.jatengprov.go.id/dataset/7e5-jumlah-umkm-binaan-jawa-tengah) | Konteks pertumbuhan populasi UMKM di level provinsi | Provinsi (time series 2019-2024) | `tahun`, jumlah UMKM binaan | Hanya UMKM **binaan**, bukan total UMKM; 2024 baru s.d. TW II |
 
@@ -204,6 +204,8 @@ eliminated[["wilayah", "tipe", "imk_unit", "imk_per_100k", "alasan_gugur"]]
 md(r"""
 **Catatan penting:** filter ini secara tidak proporsional mengeluarkan kota-kota kecil (Kota Magelang, Salatiga, Pekalongan, Tegal). Dari 6 kota, hanya Kota Semarang dan Kota Surakarta yang lolos. Ini adalah **trade-off** yang disadari: fokus pada wilayah dengan basis sektor cukup besar, tetapi analisis kota-kota kecil perlu dilakukan terpisah pada milestone berikutnya.
 
+**Pemetaan sektor:** Brief ICP Klay menyasar ritel, F&B, dan jasa transaksi kecil berulang. Data publik yang dipakai tidak menyediakan komposisi sektor per kabupaten/kota. Karena itu, jumlah unit IMK dipakai sebagai proxy umum usaha mikro/kecil dan pedagang pasar sebagai proxy ritel/F&B tradisional. Komposisi F&B dan jasa per wilayah tidak dapat difilter terpisah, dan filter sektor tanpa transaksi harian rutin tidak dapat diterapkan pada level ini; filter hanya dilakukan pada level wilayah. Keterbatasan ini dicatat eksplisit, bukan diisi dengan tebakan.
+
 ### 2.4 Normalisasi Min-Max
 
 Normalisasi dilakukan pada 30 wilayah yang lolos, dengan rumus:
@@ -215,7 +217,8 @@ Fitur yang dinormalisasi mewakili lima komponen ICP. Hasil normalisasi berada pa
 
 code(r"""
 features = {
-    "penduduk_ribu": "ukuran_pasar_penduduk",
+    "imk_unit": "ukuran_pasar_imk",
+    "pedagang_pasar": "ukuran_pasar_pedagang",
     "imk_per_100k": "kepadatan_imk",
     "pedagang_per_100k": "kepadatan_pedagang",
     "ipm": "kesiapan_ipm",
@@ -243,7 +246,7 @@ Komponen ICP dibentuk dari rata-rata sederhana indikator terormalisasi. **Ini bu
 """)
 
 code(r"""
-clean["komp_ukuran_pasar"] = clean["ukuran_pasar_penduduk"]
+clean["komp_ukuran_pasar"] = clean[["ukuran_pasar_imk", "ukuran_pasar_pedagang"]].mean(axis=1)
 clean["komp_kepadatan_sektor"] = clean[["kepadatan_imk", "kepadatan_pedagang"]].mean(axis=1)
 clean["komp_kesiapan_digital"] = clean[["kesiapan_ipm", "kesiapan_pengeluaran"]].mean(axis=1)
 clean["komp_adopsi_digital"] = clean[["adopsi_simpanan", "adopsi_tabungan"]].mean(axis=1)
@@ -482,7 +485,7 @@ print(clean[["supermarket", "pasar", "pedagang_pasar"]].sum().to_string())
 md(r"""
 **Interpretasi bisnis:** hampir seluruh ekosistem retail di wilayah terpilih berbasis pasar rakyat; supermarket hanya sebagian kecil. Ini memperkuat tesis bahwa **pasar tradisional dan pedagangnya adalah segmen utama Klay**, bukan hanya retail modern. Wilayah dengan pedagang pasar banyak tetapi supermarket sedikit (mis. Kebumen, Kendal) memiliki ketergantungan tinggi pada transaksi tunai - peluang untuk edukasi pembayaran digital dan pencatatan penjualan.
 
-## Bagian 4 - Rancangan Bobot Indeks Calon Pelanggan (ICP)
+## Bagian 4 - Rancangan Bobot Ideal Customer Profile (ICP)
 
 Bobot disusun dari lima komponen yang mencerminkan kesesuaian produk, kemampuan bayar, dan kemudahan akuisisi. Total bobot = 100%.
 """)
@@ -492,18 +495,18 @@ weights = pd.DataFrame({
     "Komponen": ["Ukuran Pasar", "Kepadatan Sektor Target", "Kesiapan Digital",
                  "Adopsi Pembayaran Digital", "Aktivitas Ekonomi"],
     "Indikator": [
-        "Jumlah penduduk; jumlah pedagang pasar",
+        "Jumlah unit IMK; jumlah pedagang pasar",
         "IMK per 100.000 penduduk; pedagang pasar per 100.000 penduduk",
-        "IPM; pengeluaran per kapita",
-        "Simpanan per kapita; tabungan per kapita",
+        "IPM; pengeluaran per kapita (proxy literasi digital dan daya beli)",
+        "Simpanan per kapita; tabungan per kapita (proxy QRIS/non-tunai)",
         "PDRB per kapita",
     ],
     "Arah": ["+", "+", "+", "+", "+"],
     "Bobot": [0.25, 0.25, 0.20, 0.15, 0.15],
     "Justifikasi": [
-        "Volume merchant dan transaksi menentukan potensi revenue; Klay memonetisasi per outlet.",
+        "Jumlah usaha mikro/kecil dan pedagang pasar menentukan volume merchant dan transaksi; Klay memonetisasi per outlet.",
         "F&B, retail, dan jasa adalah pengguna utama POS; kepadatan tinggi menurunkan biaya akuisisi per leads.",
-        "Literasi dan daya beli menurunkan biaya onboarding serta churn.",
+        "IPM dan daya beli adalah proxy kesiapan digital karena persentase pengguna internet/ponsel per kab/kota tidak tersedia di sumber terpilih.",
         "Proxy kebiasaan nontunai dan akses layanan keuangan; QRIS ideal tetapi belum tersedia per kab/kota.",
         "Intensitas bisnis dan kemampuan bayar menentukan kesediaan berlangganan.",
     ],
@@ -520,7 +523,7 @@ for i, r in weights.iterrows():
 ax.set_xlim(0, 0.32)
 ax.set_xlabel("Bobot")
 ax.set_ylabel("")
-ax.set_title("Rancangan Bobot Indeks Calon Pelanggan (ICP) Klay")
+ax.set_title("Rancangan Bobot Ideal Customer Profile (ICP) Klay")
 ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{x:.0%}"))
 plt.tight_layout()
 plt.savefig("figures/fig9_bobot_icp.png", bbox_inches="tight")
@@ -538,7 +541,7 @@ $$ICP_i = 0{,}25 \cdot U_i + 0{,}25 \cdot K_i + 0{,}20 \cdot D_i + 0{,}15 \cdot 
 
 dengan:
 
-- $U_i$ = komponen Ukuran Pasar (rata-rata Min-Max penduduk dan pedagang pasar),
+- $U_i$ = komponen Ukuran Pasar (rata-rata Min-Max jumlah unit IMK dan jumlah pedagang pasar),
 - $K_i$ = komponen Kepadatan Sektor Target (rata-rata Min-Max IMK/100k dan pedagang/100k),
 - $D_i$ = komponen Kesiapan Digital (rata-rata Min-Max IPM dan pengeluaran per kapita),
 - $A_i$ = komponen Adopsi Pembayaran Digital (rata-rata Min-Max simpanan dan tabungan per kapita),
@@ -566,6 +569,7 @@ Semua komponen berada pada 0-1, sehingga $ICP_i$ juga 0-1. **Skor akhir, peringk
 ### 5.2 Keterbatasan
 
 - **Proxy sektor**: IMK hanya mencakup industri manufaktur mikro/kecil, bukan seluruh UMKM. Pedagang pasar hanya mencakup pedagang di pasar rakyat, bukan seluruh retail.
+- **Komposisi sektor**: data publik yang dipakai tidak menyediakan proporsi ritel/F&B/jasa per kabupaten/kota, sehingga filter sektor tanpa transaksi harian rutin tidak diterapkan; IMK dan pedagang pasar hanya proxy. Ini adalah limitasi eksplisit, bukan data yang ditebak.
 - **Data adopsi digital**: QRIS merchant per kabupaten/kota tidak tersedia publik; simpanan/tabungan per kapita hanya proxy tidak langsung.
 - **Level agregasi**: UMKM binaan hanya tersedia di level provinsi dan hanya mencakup UMKM yang difasilitasi Dinkop, bukan total UMKM. Karena itu, data ini dipakai sebagai konteks, bukan fitur aditif.
 - **Filter**: ambang 10.000 unit IMK mengeluarkan empat dari enam kota, sehingga hasil lebih representatif untuk kabupaten. Analisis kota kecil perlu dilakukan terpisah.
@@ -583,7 +587,7 @@ Semua komponen berada pada 0-1, sehingga $ICP_i$ juga 0-1. **Skor akhir, peringk
 md(r"""
 ## Lampiran - Ekspor dataset
 
-Dataset akhir dan daftar wilayah tereliminasi disimpan ke `data/processed/` agar dapat direproduksi dan dipakai pada milestone berikutnya.
+Dataset akhir dan daftar wilayah tereliminasi disimpan ke `data/processed/` agar dapat direproduksi dan dipakai pada milestone berikutnya. File CSV dipakai untuk pipeline, sedangkan file Excel diberi format agar mudah dibaca dan dipresentasikan.
 """)
 
 code(r"""
@@ -592,8 +596,101 @@ clean_export = clean.drop(columns=helper_cols)
 clean_export.to_csv("data/processed/master_clean.csv", index=False)
 eliminated.to_csv("data/processed/wilayah_tereliminasi.csv", index=False)
 
+from openpyxl import load_workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+
+summary = pd.DataFrame({
+    "Item": ["Judul", "Kelompok", "Anggota", "Wilayah awal", "Wilayah lolos",
+             "Wilayah gugur", "Sumber data", "Periode"],
+    "Keterangan": [
+        "Market Prioritization UMKM - Klay",
+        "13",
+        "Ayu Safitri; Carissa Zia W. F; Gerard Harjuno N",
+        "35 kabupaten/kota Jawa Tengah",
+        f"{len(clean_export)} wilayah",
+        f"{len(eliminated)} wilayah",
+        "BPS Jateng, BPS Penduduk, BPS IPM, Dinkop Jateng",
+        "2023-2024",
+    ],
+})
+
+xlsx_path = "data/processed/Tugas2_DS_Kelompok13_Data.xlsx"
+elim_cols = ["wilayah", "tipe", "imk_unit", "imk_per_100k", "alasan_gugur"]
+with pd.ExcelWriter(xlsx_path, engine="openpyxl") as writer:
+    summary.to_excel(writer, sheet_name="Ringkasan", index=False)
+    master.to_excel(writer, sheet_name="Data Mentah", index=False)
+    clean_export.to_excel(writer, sheet_name="Data Bersih", index=False)
+    eliminated[elim_cols].to_excel(writer, sheet_name="Wilayah Gugur", index=False)
+    umkm.to_excel(writer, sheet_name="UMKM Provinsi", index=False)
+    weights.to_excel(writer, sheet_name="Bobot ICP", index=False)
+
+wb = load_workbook(xlsx_path)
+header_fill = PatternFill("solid", fgColor="1F4E79")
+header_font = Font(bold=True, color="FFFFFF", size=10)
+alt_fill = PatternFill("solid", fgColor="EAF2F8")
+thin = Side(style="thin", color="B7C9D6")
+border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+for ws in wb.worksheets:
+    ws.freeze_panes = "B2"
+    ws.auto_filter.ref = ws.dimensions
+    ws.sheet_view.showGridLines = False
+    ws.row_dimensions[1].height = 34
+    for cell in ws[1]:
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = border
+    for r in range(2, ws.max_row + 1):
+        for cell in ws[r]:
+            cell.border = border
+            cell.alignment = Alignment(vertical="top", wrap_text=True)
+            if r % 2 == 0:
+                cell.fill = alt_fill
+        ws.row_dimensions[r].height = 28
+    for col in ws.columns:
+        letter = get_column_letter(col[0].column)
+        max_len = max(len(str(c.value)) if c.value is not None else 0 for c in col)
+        ws.column_dimensions[letter].width = min(max(12, max_len + 2), 34)
+
+    for cell in ws[1]:
+        header = str(cell.value)
+        if header == "Bobot":
+            fmt = "0%"
+        elif any(k in header for k in ["norm", "komp_", "ipm", "per_100k", "per_kapita", "growth", "pertumbuhan"]):
+            fmt = "0.000"
+        elif any(k in header for k in ["unit", "tenaga_kerja", "pasar", "supermarket", "penduduk_ribu", "pdrb", "simpanan", "tabungan", "pengeluaran", "binaan"]):
+            fmt = "#,##0"
+        else:
+            fmt = None
+        if fmt:
+            for row in ws.iter_rows(min_row=2, min_col=cell.column, max_col=cell.column):
+                for c in row:
+                    c.number_format = fmt
+
+for ws_name, widths in {
+    "Ringkasan": {"A": 22, "B": 78},
+    "Wilayah Gugur": {"A": 22, "B": 12, "C": 14, "D": 14, "E": 52},
+    "UMKM Provinsi": {"A": 10, "B": 16, "C": 24, "D": 24},
+    "Bobot ICP": {"A": 28, "B": 52, "C": 8, "D": 10, "E": 72},
+}.items():
+    ws = wb[ws_name]
+    for col, width in widths.items():
+        ws.column_dimensions[col].width = width
+    for r in range(2, ws.max_row + 1):
+        if ws_name == "Bobot ICP":
+            ws.row_dimensions[r].height = 56
+        elif ws_name == "Ringkasan":
+            ws.row_dimensions[r].height = 30
+        else:
+            ws.row_dimensions[r].height = 34
+
+wb.save(xlsx_path)
+
 print("master_clean.csv        :", clean_export.shape)
 print("wilayah_tereliminasi.csv:", eliminated.shape)
+print("Excel styled            :", xlsx_path)
 print("\nKolom master_clean:")
 print(", ".join(clean_export.columns))
 """)
