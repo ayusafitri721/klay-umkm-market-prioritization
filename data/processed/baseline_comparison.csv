@@ -1,0 +1,6 @@
+Peringkat,ICP_Sektor,ICP_Wilayah,ICP_Skor,Baseline_Sektor,Baseline_Wilayah,Baseline_Unit
+1,Ritel,Kota Semarang,0.657,Ritel,Banyumas,44960
+2,F&B,Kota Semarang,0.61,Ritel,Tegal,39767
+3,Ritel,Kota Surakarta,0.594,Ritel,Grobogan,39264
+4,F&B,Kota Surakarta,0.532,Ritel,Purbalingga,37960
+5,Jasa,Kota Semarang,0.53,Ritel,Cilacap,35905

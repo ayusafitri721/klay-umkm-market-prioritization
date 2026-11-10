@@ -1,0 +1,8 @@
+Skenario,Overlap_Top5,Spearman_vs_Base,Segmen_Berubah_Peringkat
+Base,5,1.0,0
+Adopsi +5,5,0.998,52
+Adopsi -5,3,0.998,54
+PDRB +5,5,0.997,50
+PDRB -5,3,0.996,59
+Digital +10,5,0.979,72
+Digital -10,3,0.979,76
